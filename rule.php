@@ -8,6 +8,7 @@ use mod_quiz\local\access_rule_base;
 use mod_quiz\quiz_settings;
 use mod_quiz_mod_form;
 use MoodleQuickForm;
+require_once($CFG->libdir . '/externallib.php');
 
 class quizaccess_screenmonitoring extends access_rule_base
 {
@@ -101,12 +102,51 @@ class quizaccess_screenmonitoring extends access_rule_base
     /**
      * Describe the restriction in the quiz settings UI.
      */
-    public function description(): string
+    public function description(): array
     {
-        return get_string('screenshotdescription', 'quizaccess_screenmonitoring');
+        $messages = [
+            get_string('screenshotdescription', 'quizaccess_screenmonitoring'),
+        ];
+
+        return $messages;
     }
 
-    
+    public static function get_screenmonitoring_token($userid)
+    {
+        global $DB;
+
+        $service = $DB->get_record('external_services', ['shortname' => 'ScreenMonitoringService'], '*', MUST_EXIST);
+
+        $existing = $DB->get_record('external_tokens', [
+            'externalserviceid' => $service->id,
+            'userid' => $userid,
+        ]);
+
+        if ($existing) {
+            return $existing->token;
+        }
+
+        // This returns the token string directly
+        $token = external_generate_token(EXTERNAL_TOKEN_PERMANENT, $service->id, $userid, context_system::instance());
+        return $token;
+    }
+
+    public function prevent_access(): bool
+    {
+        global $PAGE, $USER, $DB, $CFG;
+
+        
+
+        $PAGE->requires->js_call_amd(
+            'quizaccess_screenmonitoring/monitor',
+            'init',
+        );
+
+        echo \html_writer::div('', 'quizaccess_screenmonitoring_init', ['style' => 'display:none']);
+
+        return false; // allow quiz access, only inject monitoring JS
+    }
+
 
     
 }
