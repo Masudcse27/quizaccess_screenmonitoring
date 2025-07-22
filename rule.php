@@ -106,11 +106,27 @@ class quizaccess_screenmonitoring extends access_rule_base
     {
         $messages = [
             get_string('screenshotdescription', 'quizaccess_screenmonitoring'),
+            $this->get_download_config_button(),
         ];
 
         return $messages;
     }
+    private function get_download_config_button(): string
+    {
+        global $OUTPUT, $USER;
 
+        $context = context_module::instance($this->quiz->cmid, MUST_EXIST);
+
+        if (has_capability('quizaccess/screenmonitoring:viewreport', $context, $USER->id)) {
+            // Generate the link for the screen monitoring report with the required quizid parameter.
+            $url = new moodle_url('/mod/quiz/accessrule/screenmonitoring/report.php', ['quizid' => $this->quiz->id]);
+            
+            return $OUTPUT->single_button($url, get_string('monitoringreport', 'quizaccess_screenmonitoring'), 'get');
+        }
+
+        // Return an empty string if the user lacks the required capability.
+        return '';
+    }
     public static function get_screenmonitoring_token($userid)
     {
         global $DB;
@@ -135,7 +151,7 @@ class quizaccess_screenmonitoring extends access_rule_base
     {
         global $PAGE, $USER, $DB, $CFG;
 
-        
+
         if (!$this->enabled) {
             return false;
         }
