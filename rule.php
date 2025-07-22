@@ -136,10 +136,47 @@ class quizaccess_screenmonitoring extends access_rule_base
         global $PAGE, $USER, $DB, $CFG;
 
         
+        if (!$this->enabled) {
+            return false;
+        }
+
+        $quizid = $this->quiz->id;
+        $cmid = $this->quiz->cmid;
+        $userid = $USER->id;
+        $interval = 5000; // Screenshot interval in ms
+
+        // Get current attempt ID (or 0 if none)
+        $params = [
+            'quiz' => $quizid,
+            'userid' => $userid,
+            'preview' => 0
+        ];
+        $attempt = $DB->get_record('quiz_attempts', $params, '*', IGNORE_MULTIPLE);
+        $attemptid = $attempt ? $attempt->id : 0;
+
+        // Moodle web service token for this user
+        $token = self::get_screenmonitoring_token($userid);
+
+        // Web service URL to receive screenshots
+        $uploadurl = $CFG->wwwroot . '/webservice/rest/server.php' .
+            '?wstoken=' . $token .
+            '&wsfunction=quizaccess_screenmonitoring_upload_image' .
+            '&moodlewsrestformat=json';
+
+        // Pass parameters to AMD JS module
+        $params = [
+            'interval' => $interval,
+            'quizid' => $quizid,
+            'cmid' => $cmid,
+            'userid' => $userid,
+            'attemptid' => $attemptid,
+            'uploadurl' => $uploadurl,
+        ];
 
         $PAGE->requires->js_call_amd(
             'quizaccess_screenmonitoring/monitor',
             'init',
+            [$params]
         );
 
         echo \html_writer::div('', 'quizaccess_screenmonitoring_init', ['style' => 'display:none']);
