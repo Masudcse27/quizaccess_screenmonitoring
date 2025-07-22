@@ -2,17 +2,31 @@ define(['jquery'], function ($) {
     return {
         init: function (params) {
             const interval = params.interval || 5000;
-            
+            const quizid = params.quizid;
+            const cmid = params.cmid;
+            const userid = params.userid;
+            const attemptid = params.attemptid;
+            const token = params.token;
+            const uploadurl = params.uploadurl;
+
             let startButtonClicked = false;
 
             function sendStartCapture() {
-                
+                const metadata = {
+                    interval: interval,
+                    quizid: quizid,
+                    cmid: cmid,
+                    userid: userid,
+                    attemptid: attemptid,
+                    uploadurl: uploadurl
+                };
 
                 console.log('📤 Sending startCapture request to extension...');
                 window.postMessage({
                     type: 'FROM_MOODLE',
                     action: 'startCapture',
-                    interval: interval
+                    interval: interval,
+                    meta: metadata
                 }, '*');
             }
 
