@@ -1,0 +1,28 @@
+<h3>Participants with Monitoring Logs</h3>
+
+{{#hasusers}}
+    <table class="generaltable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#users}}
+                <tr>
+                    <td>{{fullname}}</td>
+                    <td>{{email}}</td>
+                    <td>
+                        <a class="btn btn-secondary" href="{{reporturl}}">View Report</a>
+                    </td>
+                </tr>
+            {{/users}}
+        </tbody>
+    </table>
+{{/hasusers}}
+
+{{^hasusers}}
+    <div class="alert alert-info">No participants with monitoring logs found.</div>
+{{/hasusers}}
