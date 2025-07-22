@@ -1,0 +1,16 @@
+<h3>Monitoring Report for {{fullname}}</h3>
+
+{{#haslogs}}
+    <div class="screenshot-gallery">
+        {{#screenshots}}
+            <div class="screenshot-entry">
+                <div class="time">Captured at: {{time}}</div>
+                <img src="{{imageurl}}" alt="Screenshot">
+            </div>
+        {{/screenshots}}
+    </div>
+{{/haslogs}}
+
+{{^haslogs}}
+    <div class="alert alert-info">No screenshots found for this participant.</div>
+{{/haslogs}}
