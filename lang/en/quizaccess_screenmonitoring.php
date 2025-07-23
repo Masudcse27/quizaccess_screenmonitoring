@@ -8,3 +8,5 @@ $string['screenshotdescription'] = 'Screen capture is enabled. You must share yo
 $string['screenmonitoring:viewreport'] = 'View screen monitoring report';
 $string['monitoringreport'] = 'View Monitoring Report';
 $string['studentmonitoringreport'] = 'Screen Monitoring Report';
+$string['interval'] = 'Screenshot interval (seconds)';
+$string['interval_desc'] = 'Time interval between each screenshot capture in seconds (every 30 seconds)';
