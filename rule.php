@@ -172,7 +172,7 @@ class quizaccess_screenmonitoring extends access_rule_base
         $attemptid = $attempt ? $attempt->id : 0;
 
         // Moodle web service token for this user
-        $token = self::get_screenmonitoring_token($userid);
+        $token = get_config('quizaccess_screenmonitoring', 'accesstoken');
 
         // Web service URL to receive screenshots
         $uploadurl = $CFG->wwwroot . '/webservice/rest/server.php' .
@@ -200,7 +200,5 @@ class quizaccess_screenmonitoring extends access_rule_base
 
         return false; // allow quiz access, only inject monitoring JS
     }
-
-
-    
+ 
 }

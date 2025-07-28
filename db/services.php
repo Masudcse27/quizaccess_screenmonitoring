@@ -7,7 +7,6 @@ $functions = [
         'description' => 'Uploads screenshot from Chrome extension',
         'type'        => 'write',
         'ajax'        => true,
-        'loginrequired' => false,
     ],
 ];
 
@@ -16,5 +15,6 @@ $services = [
         'functions' => ['quizaccess_screenmonitoring_upload_image'],
         'restrictedusers' => 0,
         'enabled' => 1,
+        'shortname' => 'ScreenMonitoringService',
     ],
 ];

@@ -18,6 +18,14 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'quizaccess_screenmonitoring/accesstoken',
+        get_string('accesstoken', 'quizaccess_screenmonitoring'),
+        get_string('accesstoken_desc', 'quizaccess_screenmonitoring'),
+        '',
+        PARAM_TEXT
+    ));
+
     // Add the settings page to the quiz access rules category.
     $ADMIN->add('quizaccessrules', $settings);
 }
