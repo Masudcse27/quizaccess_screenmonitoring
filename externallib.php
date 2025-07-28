@@ -29,7 +29,7 @@ class quizaccess_screenmonitoring_external extends external_api {
         global $USER, $DB;
 
         // Allow only the user themselves or site admin
-        if ($USER->id !== $userid && !is_siteadmin()) {
+        if ($USER->id !== $userid) {
             throw new moodle_exception('unauthorized', 'quizaccess_screenmonitoring');
         }
 

@@ -97,44 +97,57 @@ define(['jquery'], function ($) {
             if (window.location.pathname.includes('attempt.php')) {
                 console.log('📌 This is attempt page');
 
-                function checkPopupOpenStatus() {
+                // Retry-based ping popup status checker
+                function checkPopupOpenStatus(maxRetries = 3, delay = 500) {
                     return new Promise((resolve) => {
-                        let responded = false;
+                        let attempt = 0;
 
-                        function onMessage(event) {
-                            if (event.source !== window || !event.data || event.data.type !== 'FROM_EXTENSION') return;
-                            if (event.data.status === 'popupStatus') {
-                                window.removeEventListener('message', onMessage);
-                                responded = true;
-                                resolve(event.data.popupOpen);
+                        function tryPing() {
+                            let responded = false;
+
+                            function onMessage(event) {
+                                if (event.source !== window || !event.data || event.data.type !== 'FROM_EXTENSION') return;
+
+                                if (event.data.status === 'popupStatus') {
+                                    window.removeEventListener('message', onMessage);
+                                    responded = true;
+                                    resolve(event.data.popupOpen);
+                                }
                             }
+
+                            window.addEventListener('message', onMessage);
+
+                            // Send pingPopup message to extension
+                            window.postMessage({
+                                type: 'FROM_MOODLE',
+                                action: 'pingPopup'
+                            }, '*');
+
+                            // Timeout fallback if no response
+                            setTimeout(() => {
+                                window.removeEventListener('message', onMessage);
+                                if (!responded) {
+                                    attempt++;
+                                    if (attempt < maxRetries) {
+                                        setTimeout(tryPing, delay); // Retry after delay
+                                    } else {
+                                        resolve(false); // All attempts failed
+                                    }
+                                }
+                            }, 1000); // Wait 1s for response
                         }
 
-                        window.addEventListener('message', onMessage);
-
-                        // Send pingPopup message to content script
-                        window.postMessage({
-                            type: 'FROM_MOODLE',
-                            action: 'pingPopup'
-                        }, '*');
-
-                        // Timeout fallback in 1 second
-                        setTimeout(() => {
-                            if (!responded) {
-                                window.removeEventListener('message', onMessage);
-                                resolve(false); // assume closed if no response
-                            }
-                        }, 1000);
+                        tryPing(); // Start first attempt
                     });
                 }
 
-                // Usage example: check and log
+                // Run popup status check
                 checkPopupOpenStatus().then(isOpen => {
                     console.log('📡 Extension popup open?', isOpen);
                     if (!isOpen) {
-                        // You can handle if popup not open, e.g. redirect, alert, etc.
                         console.warn('⚠️ Extension popup is NOT open.');
                         alert('⚠️ You must enable screen sharing to attempt this quiz.\n\nRedirecting to quiz page.');
+
                         const cmid = params.cmid;
                         if (cmid) {
                             window.location.href = M.cfg.wwwroot + '/mod/quiz/view.php?id=' + cmid;
