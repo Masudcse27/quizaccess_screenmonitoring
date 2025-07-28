@@ -69,7 +69,7 @@ define(['jquery'], function ($) {
                     console.log('🧩 Extension confirmed installed');
                 }
 
-                if (msg.status === 'captureStarted') {
+                if (msg.status === 'captureStarted' || msg.status === 'already_open') {
                     extensionResponded = true;
                     const form = $('form[action*="startattempt.php"]')[0];
                     if (form) form.submit();
@@ -94,6 +94,56 @@ define(['jquery'], function ($) {
                     sendStopCapture();
                 }
             });
+            if (window.location.pathname.includes('attempt.php')) {
+                console.log('📌 This is attempt page');
+
+                function checkPopupOpenStatus() {
+                    return new Promise((resolve) => {
+                        let responded = false;
+
+                        function onMessage(event) {
+                            if (event.source !== window || !event.data || event.data.type !== 'FROM_EXTENSION') return;
+                            if (event.data.status === 'popupStatus') {
+                                window.removeEventListener('message', onMessage);
+                                responded = true;
+                                resolve(event.data.popupOpen);
+                            }
+                        }
+
+                        window.addEventListener('message', onMessage);
+
+                        // Send pingPopup message to content script
+                        window.postMessage({
+                            type: 'FROM_MOODLE',
+                            action: 'pingPopup'
+                        }, '*');
+
+                        // Timeout fallback in 1 second
+                        setTimeout(() => {
+                            if (!responded) {
+                                window.removeEventListener('message', onMessage);
+                                resolve(false); // assume closed if no response
+                            }
+                        }, 1000);
+                    });
+                }
+
+                // Usage example: check and log
+                checkPopupOpenStatus().then(isOpen => {
+                    console.log('📡 Extension popup open?', isOpen);
+                    if (!isOpen) {
+                        // You can handle if popup not open, e.g. redirect, alert, etc.
+                        console.warn('⚠️ Extension popup is NOT open.');
+                        alert('⚠️ You must enable screen sharing to attempt this quiz.\n\nRedirecting to quiz page.');
+                        const cmid = params.cmid;
+                        if (cmid) {
+                            window.location.href = M.cfg.wwwroot + '/mod/quiz/view.php?id=' + cmid;
+                        } else {
+                            window.location.href = M.cfg.wwwroot + '/mod/quiz/';
+                        }
+                    }
+                });
+            }
         }
     };
 });

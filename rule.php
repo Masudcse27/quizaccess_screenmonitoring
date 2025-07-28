@@ -159,7 +159,8 @@ class quizaccess_screenmonitoring extends access_rule_base
         $quizid = $this->quiz->id;
         $cmid = $this->quiz->cmid;
         $userid = $USER->id;
-        $interval = 5000; // Screenshot interval in ms
+        $interval = get_config('quizaccess_screenmonitoring', 'interval'); // Default to 30 seconds if not set
+        $interval *= 1000;
 
         // Get current attempt ID (or 0 if none)
         $params = [
@@ -171,7 +172,7 @@ class quizaccess_screenmonitoring extends access_rule_base
         $attemptid = $attempt ? $attempt->id : 0;
 
         // Moodle web service token for this user
-        $token = self::get_screenmonitoring_token($userid);
+        $token = get_config('quizaccess_screenmonitoring', 'accesstoken');
 
         // Web service URL to receive screenshots
         $uploadurl = $CFG->wwwroot . '/webservice/rest/server.php' .
@@ -199,7 +200,5 @@ class quizaccess_screenmonitoring extends access_rule_base
 
         return false; // allow quiz access, only inject monitoring JS
     }
-
-
-    
+ 
 }
