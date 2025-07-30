@@ -28,10 +28,7 @@ class quizaccess_screenmonitoring_external extends external_api {
     public static function upload_image(string $image, int $quizid, int $userid, int $attemptid = 0): array {
         global $USER, $DB;
 
-        // Allow only the user themselves or site admin
-        if ($USER->id !== $userid) {
-            throw new moodle_exception('unauthorized', 'quizaccess_screenmonitoring');
-        }
+        
 
         // Get quiz context and validate
         $cm = get_coursemodule_from_instance('quiz', $quizid, 0, false, MUST_EXIST);
